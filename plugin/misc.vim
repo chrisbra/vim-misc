@@ -165,6 +165,8 @@ endfunction
  
 command! -nargs=+ -complete=command Page :call <SID>Page(<q-args>)
 
+" CursorLineNr should change color in gui mode
+call misc#CursorLineNrAdjustment()
 " Restore: "{{{2
 let &cpo=s:cpo
 unlet s:cpo

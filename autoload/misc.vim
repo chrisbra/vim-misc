@@ -21,7 +21,7 @@ fu! <sid>Interpolate(p, fro, to)
 endfunction
 
 function <sid>OnCursorMoved1()
-    if !(&nu || &rnu)
+    if !(&cul || &rnu)
 	return
     endif
     let endLNr = line('$')

@@ -170,32 +170,49 @@ call misc#CursorLineNrAdjustment()
 
 " Highlight search term {{{2
 " http://vi.stackexchange.com/q/2761
-fun! SearchHighlight()
-    silent! call matchdelete(b:ring)
-    let b:ring = matchadd('ErrorMsg', '\c\%#' . @/, 101)
-endfun
 
-fun! SearchNext()
-    try
-        execute 'normal! ' . 'Nn'[v:searchforward]
-    catch /E385:/
-        echohl ErrorMsg | echo "E385: search hit BOTTOM without match for: " . @/ | echohl None
-    endtry
-    call SearchHighlight()
-endfun
+" Disabled for now, does not work as wanted:
+if 0
+  fun! SearchHighlight()
+	  silent! call matchdelete(b:ring)
+	  let b:ring = matchadd('ErrorMsg', '\c\%#' . @/, 101)
+  endfun
 
-fun! SearchPrev()
-    try
-        execute 'normal! ' . 'nN'[v:searchforward]
-    catch /E384:/
-        echohl ErrorMsg | echo "E384: search hit TOP without match for: " . @/ | echohl None
-    endtry
-    call SearchHighlight()
-endfun
+  fun! SearchNext()
+	  try
+		  execute 'normal! ' . 'Nn'[v:searchforward]
+	  catch /E385:/
+		  echohl ErrorMsg | echo "E385: search hit BOTTOM without match for: " . @/ | echohl None
+	  endtry
+	  call SearchHighlight()
+  endfun
 
-" Highlight entry
-nnoremap <silent> n :call SearchNext()<CR>
-nnoremap <silent> N :call SearchPrev()<CR>
+  fun! SearchPrev()
+	  try
+		  execute 'normal! ' . 'nN'[v:searchforward]
+	  catch /E384:/
+		  echohl ErrorMsg | echo "E384: search hit TOP without match for: " . @/ | echohl None
+	  endtry
+	  call SearchHighlight()
+  endfun
+
+  " Highlight entry
+  nnoremap <silent> n :call SearchNext()<CR>
+  nnoremap <silent> N :call SearchPrev()<CR>
+endif
+
+" Damian Conway's Die Blinkënmatchen: highlight matches
+nnoremap <silent> n n:call HLNext(0.2)<cr>
+nnoremap <silent> N N:call HLNext(0.2)<cr>
+
+function! HLNext (blinktime)
+  let target_pat = '\c\%#'.@/
+  let ring = matchadd('ErrorMsg', target_pat, 101)
+  redraw
+  exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
+  call matchdelete(ring)
+  redraw
+endfunction
 
 " Command Abbreviation {{{2
 " simple version of cmdalias.vim

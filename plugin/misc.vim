@@ -168,7 +168,7 @@ command! -nargs=+ -complete=command Page :call <SID>Page(<q-args>)
 " CursorLineNr should change color in gui mode
 call misc#CursorLineNrAdjustment()
 
-" Highlight search term
+" Highlight search term {{{2
 " http://vi.stackexchange.com/q/2761
 fun! SearchHighlight()
     silent! call matchdelete(b:ring)
@@ -196,6 +196,18 @@ endfun
 " Highlight entry
 nnoremap <silent> n :call SearchNext()<CR>
 nnoremap <silent> N :call SearchPrev()<CR>
+
+" Command Abbreviation {{{2
+" simple version of cmdalias.vim
+function! CommandCabbr(abbreviation, expansion)
+  execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
+endfunction
+command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
+" Use it on itself to define a simpler abbreviation for itself.
+CommandCabbr ccab CommandCabbr
+
+" Capture messages in new window {{{2
+:com! Messages :redir =>a|sil mess|redir end|new|set buftype=nofile|0put =a
 " Restore: "{{{2
 let &cpo=s:cpo
 unlet s:cpo

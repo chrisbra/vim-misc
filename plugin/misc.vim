@@ -225,6 +225,32 @@ CommandCabbr ccab CommandCabbr
 
 " Capture messages in new window {{{2
 :com! Messages :redir =>a|sil mess|redir end|new|set buftype=nofile|0put =a
+" Quickfix Do command
+" :QFDo! iterates over location list
+" :QFDo iterates over quickfix list
+" Define Function Quick-Fix-List-Do:
+fun! QFDo(bang, command) 
+     let qflist={} 
+     if a:bang 
+         let tlist=map(getloclist(0), 'get(v:val, ''bufnr'')') 
+     else 
+         let tlist=map(getqflist(), 'get(v:val, ''bufnr'')') 
+     endif 
+     if empty(tlist) 
+        echomsg "Empty Quickfixlist. Aborting" 
+        return 
+     endif 
+     for nr in tlist 
+     let item=fnameescape(bufname(nr)) 
+     if !get(qflist, item,0) 
+         let qflist[item]=1 
+     endif 
+     endfor 
+     :exe 'argl ' .join(keys(qflist)) 
+     :exe 'argdo ' . a:command 
+endfunc 
+
+com! -nargs=1 -bang Qfdo :call QFDo(<bang>0,<q-args>) 
 " Restore: "{{{2
 let &cpo=s:cpo
 unlet s:cpo

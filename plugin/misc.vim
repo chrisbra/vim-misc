@@ -224,8 +224,9 @@ command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
 CommandCabbr ccab CommandCabbr
 
 " Capture messages in new window {{{2
-:com! Messages :redir =>a|sil mess|redir end|new|set buftype=nofile|0put =a
-" Quickfix Do command
+:com! -nargs=1 Exe :redir => a|exe "sil " <q-args>|redir end|new |set buftype=nofile|0put =a
+:com! Messages Exe mess
+" Quickfix Do command {{{2
 " :QFDo! iterates over location list
 " :QFDo iterates over quickfix list
 " Define Function Quick-Fix-List-Do:

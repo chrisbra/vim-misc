@@ -9,8 +9,7 @@ fu! misc#List(command)
     endif
     let loclist = []
     for file in b
-	call add(loclist, {"filename": file,
-	\ "lnum": 1})
+	call add(loclist, {"filename": file, "lnum": 1})
     endfor
     call setloclist(0, loclist)
     lopen

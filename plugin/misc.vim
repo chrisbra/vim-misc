@@ -13,15 +13,17 @@ com! Oldfiles		:call misc#List('oldfiles')
 com! LastChange     :echo " start: ".string(getpos("'["))." end: ".string(getpos("']"))
 
 " C-L should also clear search highlighting "{{{2
-nnoremap <silent> <c-l> <c-l>:nohls<cr>
+if maparg("<c-l>", 'n') == ''
+  nnoremap <silent> <c-l> <c-l>:nohls<cr>
+endif
 
 " Make certain keys in insert mode undoable "{{{2
 " make <BS> <DEL> <C-U> and <C-W> undoable
 " h i_Ctrl-g_u
 inoremap <C-U> <C-G>u<C-U>
 inoremap <C-W> <C-G>u<C-W>
-inoremap <BS> <C-G>u<BS>
-inoremap <DEL> <C-G>u<DEL>
+"inoremap <BS> <C-G>u<BS>
+"inoremap <DEL> <C-G>u<DEL>
 " let i_Ctrl-R be undoable (should also be redoable with '.')
 inoremap <c-r> <c-g>u<c-r>
 
@@ -60,7 +62,7 @@ function! Csfind(cmd, querytype, name)
 			" try to find a cscope.out file
 				let cscopefile = findfile("cscope.out", ".;")
 				if empty(cscopefile)
-					throw "No Cscope database found!"
+					throw "E:No Cscope database found!"
 				else
 					exe "cs add" cscopefile
 				endif
@@ -252,6 +254,24 @@ fun! QFDo(bang, command)
 endfunc 
 
 com! -nargs=1 -bang Qfdo :call QFDo(<bang>0,<q-args>) 
+
+" when typing : and = let it have aligned automatically.
+inoremap <silent> :   :<Esc>:call <SID>align(':')<CR>a
+inoremap <silent> =   =<Esc>:call <SID>align('=')<CR>a
+
+function! s:align(aa)
+  if !exists(":Tabularize")
+	return
+  endif
+  let p = '^.*\s'.a:aa.'\s.*$'
+  if (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+    let column = strlen(substitute(getline('.')[0:col('.')],'[^'.a:aa.']','','g'))
+    let position = strlen(matchstr(getline('.')[0:col('.')],'.*'.a:aa.':\s*\zs.*'))
+    exec 'Tabularize/'.a:aa.'/l1'
+    normal! 0
+    call search(repeat('[^'.a:aa.']*'.a:aa,column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+  endif
+endfunction
 " Restore: "{{{2
 let &cpo=s:cpo
 unlet s:cpo

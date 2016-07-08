@@ -1,6 +1,10 @@
 fu! misc#List(command)
     if a:command == 'scriptnames'
-	redir => a|exe "sil! scriptnames"|redir end
+	if exists("*evalcmd")
+	    let a=evalcmd(":scriptnames")
+	else
+	    redir => a|exe "sil! scriptnames"|redir end
+	endif
 	let b = split(a, "\n")
 	call map(b, 'matchstr(v:val, ''^\s*\d\+:\s\+\zs.*'')')
 	call map(b, 'fnamemodify(v:val, '':p'')')

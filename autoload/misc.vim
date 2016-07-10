@@ -1,7 +1,7 @@
 fu! misc#List(command)
     if a:command == 'scriptnames'
-	if exists("*evalcmd")
-	    let a=evalcmd(":scriptnames")
+	if exists("*execute")
+	    let a=execute(":scriptnames")
 	else
 	    redir => a|exe "sil! scriptnames"|redir end
 	endif

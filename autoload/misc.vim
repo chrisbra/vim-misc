@@ -1,4 +1,4 @@
-fu! misc#List(command)
+fu! misc#List(command) "{{{1
   if a:command == 'scriptnames'
     let a=execute(":scriptnames")
     let b = split(a, "\n")
@@ -15,11 +15,11 @@ fu! misc#List(command)
   lopen
 endfu
 
-fu! <sid>Interpolate(p, fro, to)
+function! <sid>Interpolate(p, fro, to) "{{{1
   return a:fro + a:p * (a:to - a:fro)
 endfunction
 
-function <sid>OnCursorMoved1()
+function! <sid>OnCursorMoved1() "{{{1
   if !(&cul || &rnu)
     return
   endif
@@ -52,7 +52,7 @@ function <sid>OnCursorMoved1()
   exe 'hi CursorLineNr guibg=#'.c.' guifg='.fg_color
 endfunction
 
-function misc#CursorLineNrAdjustment()
+function! misc#CursorLineNrAdjustment() "{{{1
   if has("gui_running")
     aug CursorLineNr
       au!
@@ -66,7 +66,9 @@ function misc#CursorLineNrAdjustment()
 endfu
 
 function! misc#ShowOldFiles(mods, bang, filter) "{{{1
-  let i=1
+  let nr = {}
+  let i=0
+  let j=1
   let length=len(v:oldfiles)
   if length < 1
     echo "no oldfiles available"
@@ -81,7 +83,7 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
   endif
   for val in v:oldfiles[first:last]
     if val =~? a:filter
-      echon printf("%*d) ", strlen(length), i)
+      echon printf("%*d) ", strlen(length), j)
       if !empty(a:filter)
         let [start, end] = [match(val, a:filter), matchend(val, a:filter)]
         echon strpart(val, 0, start)
@@ -92,6 +94,8 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
       else
         echon val."\n"
       endif
+      let nr[j]=i
+      let j+=1
     endif
     let i+=1
   endfor
@@ -105,7 +109,7 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     if !empty(a:mods)
       let cmd = a:mods. (a:mods isnot# 'tab' ? ' ': '')
     endif
-    let cmd .= 'e '. fnameescape(v:oldfiles[input-1])
+    let cmd .= 'e '. fnameescape(v:oldfiles[nr[input]])
     exe cmd
     call histadd(':', cmd)
   endif

@@ -257,7 +257,7 @@ com! -nargs=1 -bang Qfdo :call QFDo(<bang>0,<q-args>)
 " bang: always show all files from :oldfiles, else only the same number as lines available (to not have to scroll)
 " extra arg: filter the list for pattern
 " also works :tab :OpenOldFiles
-com! -bang -nargs=? OpenOldFiles :call s:ShowOldFiles(<q-mods>, <q-bang>, <q-args>)
+com! -bang -nargs=? OpenOldFiles :call misc#ShowOldFiles(<q-mods>, <q-bang>, <q-args>)
 
 " disabled, because it often happens, when I don't want it
 if 0

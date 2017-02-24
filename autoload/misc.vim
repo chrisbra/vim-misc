@@ -99,6 +99,9 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     endif
     let i+=1
   endfor
+  if j == 1
+    return
+  endif
   let input=input('Enter number of file to open: ')
   if empty(input)
     return

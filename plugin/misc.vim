@@ -8,8 +8,8 @@ set cpo&vim
 let g:loaded_misc_plugin = 1
 
 " Define the actual Commands "{{{2
-com! Scriptnames	:call misc#List('scriptnames')
-com! Oldfiles		:call misc#List('oldfiles')
+com! Scriptnames  :call misc#List('scriptnames')
+com! Oldfiles   :call misc#List('oldfiles')
 com! LastChange     :echo " start: ".string(getpos("'["))." end: ".string(getpos("']"))
 
 " C-L should also clear search highlighting "{{{2
@@ -44,52 +44,52 @@ command! -bang Q q<bang>
 command! -nargs=+ Csfind call Csfind("cscope", <f-args>) 
 
 function! Csfind(cmd, querytype, name) 
-	try 
-		execute a:cmd "find" a:querytype  a:name 
-		return 
-	catch /E567/                    " 'no cscope connections' 
-		" Continue after endtry. 
-	catch /.*/                      " Any other error. 
-		call s:EchoException() 
-		return 
-	endtry 
-	try 
-		if exists("g:cscope_prepend_path") 
-			execute "cs add" g:cscope_database g:cscope_prepend_path 
-		elseif exists("g:cscope_database")
-			execute "cs add" g:cscope_database 
-		else
-			" try to find a cscope.out file
-				let cscopefile = findfile("cscope.out", ".;")
-				if empty(cscopefile)
-					throw "E:No Cscope database found!"
-				else
-					exe "cs add" cscopefile
-				endif
-		endif 
-	catch /.*/ 
-		" Note:  The perror() message 
-		"    cs_read_prompt EOF: Error 0 
-		" currently (2004-02-20) hides the more-informative message 
-		"    E609: Cscope error: cscope: cannot read file version from file cscope.out 
-		" 
-		call s:EchoException() 
-		return 
-	endtry 
-	try 
-		execute a:cmd "find" a:querytype  a:name 
-	catch /.*/                      " Any error. 
-		call s:EchoException() 
-	endtry 
+  try 
+    execute a:cmd "find" a:querytype  a:name 
+    return 
+  catch /E567/                    " 'no cscope connections' 
+    " Continue after endtry. 
+  catch /.*/                      " Any other error. 
+    call s:EchoException() 
+    return 
+  endtry 
+  try 
+    if exists("g:cscope_prepend_path") 
+      execute "cs add" g:cscope_database g:cscope_prepend_path 
+    elseif exists("g:cscope_database")
+      execute "cs add" g:cscope_database 
+    else
+      " try to find a cscope.out file
+      let cscopefile = findfile("cscope.out", ".;")
+      if empty(cscopefile)
+        throw "E:No Cscope database found!"
+      else
+        exe "cs add" cscopefile
+      endif
+    endif 
+  catch /.*/ 
+    " Note:  The perror() message 
+    "    cs_read_prompt EOF: Error 0 
+    " currently (2004-02-20) hides the more-informative message 
+    "    E609: Cscope error: cscope: cannot read file version from file cscope.out 
+    " 
+    call s:EchoException() 
+    return 
+  endtry 
+  try 
+    execute a:cmd "find" a:querytype  a:name 
+  catch /.*/                      " Any error. 
+    call s:EchoException() 
+  endtry 
 endfunction 
 
 function! s:EchoException() 
-	if &errorbells 
-		normal \<Esc>               " Generate a bell 
-	endif 
-	echohl ErrorMsg 
-	echo matchstr(v:exception, ':\zs.*') 
-	echohl None 
+  if &errorbells 
+    normal \<Esc>               " Generate a bell 
+  endif 
+  echohl ErrorMsg 
+  echo matchstr(v:exception, ':\zs.*') 
+  echohl None 
 endfunction 
 
 hi link searchFound Search
@@ -142,27 +142,24 @@ nnoremap \<C-f> :call <SID>search('', getpos('.'))<CR>
 ":Page !wc %
 "Capture and return the long output of a verbose command.
 function! s:Redir(cmd)
-	let output = ""
-	redir =>> output
-	silent exe a:cmd
-	redir END
-	" remove first blank line
-	return output[1:]
+  let outpust=execute(a:cmd)
+  " remove first blank line
+  return output[1:]
 endfunction
  
 "A command to open a scratch buffer.
 function! s:Scratch()
-	split Scratch
-	setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted
-	return bufnr("%")
+  split Scratch
+  setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted
+  return bufnr("%")
 endfunction
  
 "Put the output of acommand into a scratch buffer.
 function! s:Page(command)
-	let output = s:Redir(a:command)
-	call s:Scratch()
-	normal gg
-	call append(1, split(output, "\n"))
+  let output = s:Redir(a:command)
+  call s:Scratch()
+  normal gg
+  call append(1, split(output, "\n"))
 endfunction
  
 command! -nargs=+ -complete=command Page :call <SID>Page(<q-args>)
@@ -176,26 +173,26 @@ call misc#CursorLineNrAdjustment()
 " Disabled for now, does not work as wanted:
 if 0
   fun! SearchHighlight()
-	  silent! call matchdelete(b:ring)
-	  let b:ring = matchadd('ErrorMsg', '\c\%#' . @/, 101)
+    silent! call matchdelete(b:ring)
+    let b:ring = matchadd('ErrorMsg', '\c\%#' . @/, 101)
   endfun
 
   fun! SearchNext()
-	  try
-		  execute 'normal! ' . 'Nn'[v:searchforward]
-	  catch /E385:/
-		  echohl ErrorMsg | echo "E385: search hit BOTTOM without match for: " . @/ | echohl None
-	  endtry
-	  call SearchHighlight()
+    try
+      execute 'normal! ' . 'Nn'[v:searchforward]
+    catch /E385:/
+      echohl ErrorMsg | echo "E385: search hit BOTTOM without match for: " . @/ | echohl None
+    endtry
+    call SearchHighlight()
   endfun
 
   fun! SearchPrev()
-	  try
-		  execute 'normal! ' . 'nN'[v:searchforward]
-	  catch /E384:/
-		  echohl ErrorMsg | echo "E384: search hit TOP without match for: " . @/ | echohl None
-	  endtry
-	  call SearchHighlight()
+    try
+      execute 'normal! ' . 'nN'[v:searchforward]
+    catch /E384:/
+      echohl ErrorMsg | echo "E384: search hit TOP without match for: " . @/ | echohl None
+    endtry
+    call SearchHighlight()
   endfun
 
   " Highlight entry
@@ -233,35 +230,44 @@ CommandCabbr ccab CommandCabbr
 " :QFDo iterates over quickfix list
 " Define Function Quick-Fix-List-Do:
 fun! QFDo(bang, command) 
-     let qflist={} 
-     if a:bang 
-         let tlist=map(getloclist(0), 'get(v:val, ''bufnr'')') 
-     else 
-         let tlist=map(getqflist(), 'get(v:val, ''bufnr'')') 
-     endif 
-     if empty(tlist) 
-        echomsg "Empty Quickfixlist. Aborting" 
-        return 
-     endif 
-     for nr in tlist 
-     let item=fnameescape(bufname(nr)) 
-     if !get(qflist, item,0) 
-         let qflist[item]=1 
-     endif 
-     endfor 
-     :exe 'argl ' .join(keys(qflist)) 
-     :exe 'argdo ' . a:command 
+  let qflist={} 
+  if a:bang 
+    let tlist=map(getloclist(0), 'get(v:val, ''bufnr'')') 
+  else 
+    let tlist=map(getqflist(), 'get(v:val, ''bufnr'')') 
+  endif 
+  if empty(tlist) 
+  echomsg "Empty Quickfixlist. Aborting" 
+  return 
+  endif 
+  for nr in tlist 
+  let item=fnameescape(bufname(nr)) 
+  if !get(qflist, item,0) 
+    let qflist[item]=1 
+  endif 
+  endfor 
+  exe 'argl ' .join(keys(qflist)) 
+  exe 'argdo ' . a:command 
 endfunc 
 
 com! -nargs=1 -bang Qfdo :call QFDo(<bang>0,<q-args>) 
 
-" when typing : and = let it have aligned automatically.
-inoremap <silent> :   :<Esc>:call <SID>align(':')<CR>a
-inoremap <silent> =   =<Esc>:call <SID>align('=')<CR>a
+" Open Most recently used files "{{{2
+" :OpenOldFiles
+" bang: always show all files from :oldfiles, else only the same number as lines available (to not have to scroll)
+" extra arg: filter the list for pattern
+" also works :tab :OpenOldFiles
+com! -bang -nargs=? OpenOldFiles :call s:ShowOldFiles(<q-mods>, <q-bang>, <q-args>)
 
-function! s:align(aa)
+" disabled, because it often happens, when I don't want it
+if 0
+  " when typing : and = let it have aligned automatically.
+  inoremap <silent> :   :<Esc>:call <SID>align(':')<CR>a
+  inoremap <silent> =   =<Esc>:call <SID>align('=')<CR>a
+
+  function! s:align(aa)
   if !exists(":Tabularize")
-	return
+    return
   endif
   let p = '^.*\s'.a:aa.'\s.*$'
   if (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
@@ -271,8 +277,9 @@ function! s:align(aa)
     normal! 0
     call search(repeat('[^'.a:aa.']*'.a:aa,column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
   endif
-endfunction
+  endfunction
+endif
 " Restore: "{{{2
 let &cpo=s:cpo
 unlet s:cpo
-" vim: ts=4 sts=4 fdm=marker com+=l\:\"
+" vim: fdm=marker com+=l\:\"

@@ -77,6 +77,22 @@ function! <sid>Strip(string, length, replacement) "{{{1
   endfor
   return join(result, '')
 endfunction
+function! <sid>OutputHighlighted(string, pattern, highlightgroup) "{{{1
+  let val = a:string
+  let cnt = 1
+  let start = 0
+  let mend = 0
+  while !empty(a:pattern) && match(val, a:pattern, start) > -1
+    let [mstart, mend] = [match(val, a:pattern, start), matchend(val, a:pattern, start)]
+    echohl Normal
+    echon strpart(val, start, mstart-start)
+    exe "echohl" a:highlightgroup
+    echon strpart(val, mstart, mend-mstart)
+    let start = mend
+  endw
+  echohl Normal
+  echon strpart(val, mend)
+endfunction
 function! misc#CursorLineNrAdjustment() "{{{1
   if has("gui_running")
     aug CursorLineNr
@@ -101,16 +117,17 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
   endif
   let first = 0
   let last  = length
-  let subst = (&enc == 'utf-8' ? '…' : ..')
+  let subst = (&enc == 'utf-8' ? '…' : '..')
   if empty(a:bang)
     " use 2 line less than the height of the window, -1 for zero based index
     let last = &lines-2-1
     let length = last
   endif
   for val in v:oldfiles[first:last]
-    let deleted = !filereadable(val)
+    " expand ~ and $VAR to their shell values
+    let deleted = !filereadable(expand(val))
     let strlen=len(split(val, '\zs'))
-    let diff  = strlen - (&columns - 2 - strlen(length) - 2 - (deleted ? 5 : 0))
+    let diff  = strlen - (&columns - 2 - strlen(length) - 2 - (deleted ? 6 : 0))
     if diff > 0
       " list too long, would wrap and change the number of lines we are
       " displaing
@@ -118,19 +135,10 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     endif
     if val =~? a:filter
       echon printf("%*d) ", strlen(length), j)
-      if !empty(a:filter)
-        let [start, end] = [match(val, a:filter), matchend(val, a:filter)]
-        echon strpart(val, 0, start)
-        echohl WarningMsg
-        echon strpart(val, start, end-start)
-        echohl Normal
-        echon strpart(val, end)
-      else
-        echon val
-      endif
+      call <sid>OutputHighlighted(val, a:filter, 'Title')
       if deleted
-        echohl WarningMsg
-        echon "[DEL]"
+        echohl Title
+        echon " [DEL]"
         echohl Normal
       endif
       echon "\n"

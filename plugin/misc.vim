@@ -259,10 +259,8 @@ com! -nargs=1 -bang Qfdo :call QFDo(<bang>0,<q-args>)
 " also works :tab :OpenOldFiles
 com! -bang -nargs=? OpenOldFiles :call misc#ShowOldFiles(<q-mods>, <q-bang>, <q-args>)
 
-if has("gui")
-  com! IncreaseFont :let &guifont=substitute(&guifont, '\d\+', '\=submatch(0)+1', '')
-  com! DecreaseFont :let &guifont=substitute(&guifont, '\d\+', '\=submatch(0)-1', '')
-endif
+com! IncreaseFont :let &guifont=substitute(&guifont, '\d\+', '\=submatch(0)+1', '')
+com! DecreaseFont :let &guifont=substitute(&guifont, '\d\+', '\=submatch(0)-1', '')
 
 " disabled, because it often happens, when I don't want it
 if 0

@@ -52,6 +52,31 @@ function! <sid>OnCursorMoved1() "{{{1
   exe 'hi CursorLineNr guibg=#'.c.' guifg='.fg_color
 endfunction
 
+function! <sid>IsWindows() "{{{1
+  return has("win32") || has("win16") || has("win64")
+endfunction
+function! <sid>Strip(string, length, replacement) "{{{1
+  " Takes string string, removes length chars with replacement char
+  if a:length <= 0
+    return string
+  endif
+  let length = a:length
+  let dirsep = <sid>IsWindows() ? '\\' : '/'
+  let result = []
+  let list = split(a:string, dirsep. '\zs')
+  for val in list
+    if strlen(val) > 3 && length > strdisplaywidth(a:replacement)
+      let newval = substitute(val,
+          \ '^.\zs.\{1,'.length.'\}\ze.\+'. dirsep. '\?$', 
+          \ a:replacement, (&gdefault ? 'g' : ''))
+      let length = length - (strdisplaywidth(val) - strdisplaywidth(newval))
+      call add(result, newval)
+      continue
+    endif
+    call add(result, val)
+  endfor
+  return join(result, '')
+endfunction
 function! misc#CursorLineNrAdjustment() "{{{1
   if has("gui_running")
     aug CursorLineNr
@@ -76,7 +101,7 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
   endif
   let first = 0
   let last  = length
-  let subst = (&enc == 'utf-8' ? '…' : '..')
+  let subst = (&enc == 'utf-8' ? '…' : ..')
   if empty(a:bang)
     " use 2 line less than the height of the window, -1 for zero based index
     let last = &lines-2-1
@@ -89,8 +114,7 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     if diff > 0
       " list too long, would wrap and change the number of lines we are
       " displaing
-      " TODO: don't shorten at the beginning, but in each path component
-      let val=substitute(val, '^.\{'.diff.'\}', subst, 'g')
+      let val=<sid>Strip(val, diff, subst)
     endif
     if val =~? a:filter
       echon printf("%*d) ", strlen(length), j)

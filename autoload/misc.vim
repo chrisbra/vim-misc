@@ -76,12 +76,22 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
   endif
   let first = 0
   let last  = length
+  let subst = (&enc == 'utf-8' ? '…' : '..')
   if empty(a:bang)
     " use 2 line less than the height of the window, -1 for zero based index
     let last = &lines-2-1
     let length = last
   endif
   for val in v:oldfiles[first:last]
+    let deleted = !filereadable(val)
+    let strlen=len(split(val, '\zs'))
+    let diff  = strlen - (&columns - 2 - strlen(length) - 2 - (deleted ? 5 : 0))
+    if diff > 0
+      " list too long, would wrap and change the number of lines we are
+      " displaing
+      " TODO: don't shorten at the beginning, but in each path component
+      let val=substitute(val, '^.\{'.diff.'\}', subst, 'g')
+    endif
     if val =~? a:filter
       echon printf("%*d) ", strlen(length), j)
       if !empty(a:filter)
@@ -90,10 +100,16 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
         echohl WarningMsg
         echon strpart(val, start, end-start)
         echohl Normal
-        echon strpart(val, end)."\n"
+        echon strpart(val, end)
       else
-        echon val."\n"
+        echon val
       endif
+      if deleted
+        echohl WarningMsg
+        echon "[DEL]"
+        echohl Normal
+      endif
+      echon "\n"
       let nr[j]=i
       let j+=1
     endif

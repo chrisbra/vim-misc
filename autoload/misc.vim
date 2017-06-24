@@ -110,7 +110,8 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
   let nr = {}
   let i=0
   let j=1
-  let length=len(v:oldfiles)
+  let list = filter(copy(v:oldfiles), 'v:val =~? a:filter')
+  let length=len(list)
   if length < 1
     echo "no oldfiles available"
     return
@@ -123,7 +124,7 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     let last = &lines-2-1
     let length = last
   endif
-  for val in v:oldfiles[first:last]
+  for val in list[first:last]
     " expand ~ and $VAR to their shell values
     let deleted = !filereadable(expand(val))
     let strlen=len(split(val, '\zs'))
@@ -133,21 +134,20 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
       " displaing
       let val=<sid>Strip(val, diff, subst)
     endif
-    if val =~? a:filter
-      echon printf("%*d) ", strlen(length), j)
-      call <sid>OutputHighlighted(val, a:filter, 'Title')
-      if deleted
-        echohl Title
-        echon " [DEL]"
-        echohl Normal
-      endif
-      echon "\n"
-      let nr[j]=i
-      let j+=1
+    echon printf("%*d) ", strlen(length), j)
+    call <sid>OutputHighlighted(val, a:filter, 'Title')
+    if deleted
+      echohl Title
+      echon " [DEL]"
+      echohl Normal
     endif
+    echon "\n"
+    let nr[j]=val
+    let j+=1
     let i+=1
   endfor
   if j == 1
+    echo "\nPattern did not match..."
     return
   endif
   let input=input('Enter number of file to open: ')
@@ -160,7 +160,8 @@ function! misc#ShowOldFiles(mods, bang, filter) "{{{1
     if !empty(a:mods)
       let cmd = a:mods. (a:mods isnot# 'tab' ? ' ': '')
     endif
-    let cmd .= 'e '. fnameescape(v:oldfiles[nr[input]])
+    let index = index(v:oldfiles, nr[input])
+    let cmd .= 'e '. fnameescape(v:oldfiles[index])
     exe cmd
     call histadd(':', cmd)
   endif

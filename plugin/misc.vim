@@ -14,7 +14,7 @@ com! LastChange     :echo " start: ".string(getpos("'["))." end: ".string(getpos
 
 " C-L should also clear search highlighting "{{{2
 if maparg("<c-l>", 'n') == ''
-  nnoremap <silent> <c-l> <c-l>:nohls<cr>
+  nnoremap <silent> <c-l> :nohls<cr>:diffupdate<cr><c-l>
 endif
 
 " Make certain keys in insert mode undoable "{{{2
@@ -198,20 +198,20 @@ if 0
   " Highlight entry
   nnoremap <silent> n :call SearchNext()<CR>
   nnoremap <silent> N :call SearchPrev()<CR>
+
+  " Damian Conway's Die Blinkënmatchen: highlight matches
+  nnoremap <silent> n n:call HLNext(0.2)<cr>
+  nnoremap <silent> N N:call HLNext(0.2)<cr>
+
+  function! HLNext (blinktime)
+    let target_pat = '\c\%#'.@/
+    let ring = matchadd('ErrorMsg', target_pat, 101)
+    redraw
+    exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
+    call matchdelete(ring)
+    redraw
+  endfunction
 endif
-
-" Damian Conway's Die Blinkënmatchen: highlight matches
-nnoremap <silent> n n:call HLNext(0.2)<cr>
-nnoremap <silent> N N:call HLNext(0.2)<cr>
-
-function! HLNext (blinktime)
-  let target_pat = '\c\%#'.@/
-  let ring = matchadd('ErrorMsg', target_pat, 101)
-  redraw
-  exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
-  call matchdelete(ring)
-  redraw
-endfunction
 
 " Command Abbreviation {{{2
 " simple version of cmdalias.vim
